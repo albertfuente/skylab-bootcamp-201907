@@ -1,12 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './components/App'
+// import CountDownDemo from './components/CountDownDemo'
 import * as serviceWorker from './serviceWorker'
 
 import { HashRouter } from 'react-router-dom'
 
 
 ReactDOM.render(<HashRouter><App /></HashRouter>, document.getElementById('root'))
+// ReactDOM.render(<CountDownDemo/>, document.getElementById('root'))
 
 
 /* ReactDOM.render(<HashRouter><App /></HashRouter>, document.getElementById('root'))

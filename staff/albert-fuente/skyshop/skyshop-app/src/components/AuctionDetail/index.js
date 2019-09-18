@@ -4,15 +4,15 @@ import logic from '../../logic'
 import Countdown from 'react-countdown-now';
 import './index.sass'
 import moment from 'moment'
-import { Redirect , withRouter } from "react-router-dom"
+import { Redirect, withRouter } from "react-router-dom"
 
 
 
-function AuctionDetail({history}) {
-  
+function AuctionDetail({ history }) {
+
   const Completionist = () => <span>Auction finished !!!</span>;
   // Renderer callback with condition
-  const renderer = ({hours, minutes, seconds, completed }) => {
+  const renderer = ({ hours, minutes, seconds, completed }) => {
     if (completed) {
       return <Completionist />;
     } else {
@@ -22,19 +22,13 @@ function AuctionDetail({history}) {
 
   const [counter, setCounter] = useState(1)
   const [success, setSuccess] = useState(false)
-  const [priceAuction, setPriceAuction] = useState(undefined)
-  const [owner, setOwner] = useState(undefined)
-  const [time, setTime] = useState(undefined)
-  const [finalTime, setFinalTime] = useState(undefined)
-  const[defined,setDefined]=useState(false)
+  const [priceAuction, setPriceAuction] = useState()
+  const [owner, setOwner] = useState()
+  const [finalTime, setFinalTime] = useState()
+  const [defined, setDefined] = useState(false)
 
-  let quantity = counter
   let price
-  let auctionId
-  let initialTime
-  let actualTime
-  let diffTime
-  let days, hours, minutes
+  let auctionId  
 
   const { setView, view, product, setProduct, productQuery, user } = useContext(Context)
   const productId = productQuery
@@ -43,7 +37,7 @@ function AuctionDetail({history}) {
     (async () => {
       try {
         const product = await logic.retrieveProduct(productQuery)
-        
+
         setProduct(product)
         setCounter(product.price)
 
@@ -64,17 +58,10 @@ function AuctionDetail({history}) {
           setPriceAuction(response.auction.price)
           setCounter(response.auction.price)
           setOwner(response.auction.owner.name)
-          initialTime=response.auction.date
 
-          const now = moment()
-          const expiration = moment(initialTime).add(1, 'days')
-          const diff = expiration.diff(now)
-          const diffDuration = moment.duration(diff)
-          days=diffDuration.days()
-          hours=diffDuration.hours()
-          minutes=diffDuration.minutes()
+          const initialTime = response.auction.date
 
-          const finalTime = parseInt((days*24*60*60000)+(hours*60*60000)+(minutes*60000))
+          const finalTime = moment(initialTime).add(1, 'days').valueOf()
 
           setFinalTime(finalTime)
         }
@@ -99,13 +86,13 @@ function AuctionDetail({history}) {
   async function handleAuction(productId) {
     if (counter > priceAuction) {
       try {
-        
+
         const isDefined = await logic.retrieveAuctionProduct(productId)
         if (isDefined.auction === false) {
           const result = await logic.setAuction(productId)
           setSuccess(true)
           setDefined(true)
-          history.push("/auctions/detail")
+          //history.push("/auctions/detail") // TODO goto /auctions/:productId
         }
         else {
           auctionId = isDefined.auction._id
@@ -149,31 +136,32 @@ function AuctionDetail({history}) {
           }}>-</button>
           <p className="detail-result">{counter + " €"}</p>
           <button className="detail-operator" onClick={event => {
-            
-            setCounter(counter + 1)          
+
+            setCounter(counter + 1)
 
           }}>+</button>
 
         </div>}
 
-        {defined &&<button className="formPanel-reject2"><a onClick={handleSubmitAuction}>Push Auction !</a></button>}
-        {!defined &&<button className="formPanel-reject2"><a onClick={handleSubmitAuction}>Start Auction !</a></button>}
+        {defined && <button className="formPanel-reject2"><a onClick={handleSubmitAuction}>Push Auction !</a></button>}
+        {!defined && <button className="formPanel-reject2"><a onClick={handleSubmitAuction}>Start Auction !</a></button>}
 
         <br></br>
-        {defined && finalTime && <Countdown date={Date.now() + parseInt(finalTime)} renderer={renderer} />}
+        { (() => console.log(finalTime))()}
+        {defined && finalTime && <Countdown date={finalTime} renderer={renderer} />}
         {priceAuction && <p className="detail-owner">{'Last push: ' + owner}</p>}
 
       </div>
       <a onClick={handleGoBack}><i className="far fa-2x fa-arrow-alt-circle-left backFromDetail"></i></a>
-      {view==="landing" && <Redirect to="/auctions"/>}
+      {view === "landing" && <Redirect to="/auctions" />}
 
     </div>
-    
+
     }
 
 
 
-    
+
 
   </>
 }
